@@ -38,7 +38,6 @@ services:
         condition: service_healthy
     environment:
       GH_DATABASE_URL: ${GH_DATABASE_URL}
-      DATABASE_URL: ${DATABASE_URL}
 
   gateway:
     image: ghcr.io/grow-revenue/gateway-harness:latest
@@ -62,7 +61,6 @@ services:
     environment:
       GH_DATA_DIR: /data
       GH_DATABASE_URL: ${GH_DATABASE_URL}
-      DATABASE_URL: ${DATABASE_URL}
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
       GH_DEFAULT_MODE: ${GH_DEFAULT_MODE:-observe}
       GH_GLOBAL_KILL: ${GH_GLOBAL_KILL:-false}
