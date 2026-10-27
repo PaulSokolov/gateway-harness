@@ -1,0 +1,10 @@
+# Enforce LF line endings across all platforms to prevent CRLF corruption on Windows/WSL2
+* text=auto eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+Dockerfile text eol=lf

@@ -1,0 +1,18 @@
+model_list:
+  - model_name: spike-src
+    litellm_params:
+      model: openai/fake-src
+      api_key: fake-key
+      mock_response: "Hello from spike-src"
+  - model_name: spike-dst
+    litellm_params:
+      model: openai/fake-dst
+      api_key: fake-key
+      mock_response: "Hello from spike-dst"
+
+litellm_settings:
+  callbacks:
+    - custom_callbacks.spike_handler
+
+general_settings:
+  master_key: sk-test-master-key

@@ -1,0 +1,56 @@
+# Python virtual environments & packages
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Linting
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Local appliance data & telemetry
+data/
+/data/
+*.duckdb
+*.duckdb.wal
+*.parquet
+*.jsonl
+*.jsonl.tmp
+*.jsonl.ready
+logs/
+*.log
+
+# Environment variables & secrets
+.env
+.env.local
+*.pem
+*.key
+
+# IDE & OS files
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db

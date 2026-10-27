@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-bar">
+    <div>
+        <h2>Active & Disabled Policies</h2>
+        <p style="color: var(--text-muted); margin: 4px 0 0 0;">Runtime routing rules enforced on gateway traffic with circuit breaker safety</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Policy ID</th>
+            <th>Requested Model</th>
+            <th>Target Model</th>
+            <th>Expected Non-Loss</th>
+            <th>Canary Rate</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pol in policies %}
+        <tr>
+            <td><code>{{ pol.policy_id[:12] }}..</code></td>
+            <td><strong>{{ pol.requested_model }}</strong></td>
+            <td><code>{{ pol.target_model }}</code></td>
+            <td>{{ "%.1f"|format(pol.expected_nonloss * 100) }}%</td>
+            <td>{{ "%.0f"|format(pol.canary_rate * 100) }}%</td>
+            <td>
+                {% if pol.status == 'active' %}
+                    <span class="badge badge-green">Active</span>
+                {% elif pol.status == 'disabled' %}
+                    <span class="badge badge-red">Disabled</span>
+                {% else %}
+                    <span class="badge badge-yellow">{{ pol.status }}</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if pol.status == 'active' %}
+                <button 
+                    class="btn btn-red" 
+                    style="padding: 4px 10px; font-size: 0.8rem;"
+                    hx-post="/api/policies/{{ pol.policy_id }}/disable"
+                    hx-target="body"
+                    hx-swap="outerHTML">
+                    Disable
+                </button>
+                {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Inactive</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">
+                No policies defined yet.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

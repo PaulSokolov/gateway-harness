@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-bar">
+    <div>
+        <h2>Candidate Routing Proposals</h2>
+        <p style="color: var(--text-muted); margin: 4px 0 0 0;">Empirically verified Harness² model downgrades with position-swapped contrastive evidence</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Proposal ID</th>
+            <th>Requested -> Target</th>
+            <th>Evidence (Non-Loss / P0)</th>
+            <th>Projected Savings</th>
+            <th>Scaffold Addendum</th>
+            <th>Status</th>
+            <th>Decision</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for prop in proposals %}
+        <tr>
+            <td><code>{{ prop.proposal_id[:12] }}..</code></td>
+            <td><strong>{{ prop.policy.requested_model }}</strong> &rarr; <span class="badge badge-green">{{ prop.policy.target_model }}</span></td>
+            <td>
+                {{ "%.1f"|format(prop.policy.expected_nonloss * 100) }}% non-loss
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Tested on {{ prop.evidence.samples_evaluated }} production samples</div>
+            </td>
+            <td><strong>{{ "%.0f"|format(prop.policy.expected_savings_pct * 100) }}%</strong></td>
+            <td>
+                {% if prop.policy.scaffold.system_addendum %}
+                    <span style="font-size: 0.8rem; color: var(--accent);">{{ prop.policy.scaffold.system_addendum[:60] }}..</span>
+                {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Direct Downgrade</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if prop.status == 'approved' %}
+                    <span class="badge badge-green">Approved</span>
+                {% elif prop.status == 'rejected' %}
+                    <span class="badge badge-red">Rejected</span>
+                {% else %}
+                    <span class="badge badge-yellow">Proposed</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if prop.status == 'proposed' %}
+                <div style="display: flex; gap: 6px;">
+                    <button 
+                        class="btn btn-green" 
+                        style="padding: 4px 10px; font-size: 0.8rem;"
+                        hx-post="/api/proposals/{{ prop.proposal_id }}/approve"
+                        hx-target="body"
+                        hx-swap="outerHTML">
+                        Approve
+                    </button>
+                    <button 
+                        class="btn btn-red" 
+                        style="padding: 4px 10px; font-size: 0.8rem;"
+                        hx-post="/api/proposals/{{ prop.proposal_id }}/reject"
+                        hx-target="body"
+                        hx-swap="outerHTML">
+                        Reject
+                    </button>
+                </div>
+                {% else %}
+                    <span style="color: var(--text-muted); font-size: 0.8rem;">Resolved</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">
+                No proposals yet. The optimizer runs automatically once clusters pass the observation gate.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

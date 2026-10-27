@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-bar">
+    <div>
+        <h2>Workload Clusters & Savings Opportunities</h2>
+        <p style="color: var(--text-muted); margin: 4px 0 0 0;">Zero-LLM deterministic clustering mining repeating prompt shapes and templates</p>
+    </div>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Cluster (Tpl / Sig)</th>
+            <th>Original Model</th>
+            <th>Volume</th>
+            <th>Spend (30d)</th>
+            <th>Best Candidate</th>
+            <th>Projected Mo. Savings</th>
+            <th>Gate Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cl in clusters %}
+        <tr>
+            <td><code>{{ cl.template_id[:8] }}.. / {{ cl.workflow_sig[:8] }}..</code></td>
+            <td><strong>{{ cl.requested_model }}</strong></td>
+            <td>{{ "{:,}".format(cl.count) }} reqs</td>
+            <td>${{ "%.2f"|format(cl.total_spend_usd) }}</td>
+            <td>
+                {% if cl.best_candidate %}
+                    <span class="badge badge-green">{{ cl.best_candidate }}</span>
+                {% else %}
+                    <span style="color: var(--text-muted);">None</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if cl.eligible %}
+                    <strong>${{ "%.2f"|format(cl.projected_monthly_savings_usd) }}</strong> ({{ "%.0f"|format(cl.projected_savings_pct * 100) }}%)
+                {% else %}
+                    <span style="color: var(--text-muted);">N/A</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if cl.gate_passed %}
+                    <span class="badge badge-green">Ready</span>
+                {% else %}
+                    <span class="badge badge-yellow" title="{{ cl.gate_reasons[0] if cl.gate_reasons else cl.ineligible_reason }}">
+                        Pending ({{ (cl.gate_reasons[0] if cl.gate_reasons else cl.ineligible_reason)[:25] }}..)
+                    </span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">
+                No clusters found in the current observation window.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

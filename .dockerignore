@@ -1,0 +1,15 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv
+.git
+.gitignore
+.ruff_cache
+.pytest_cache
+*.parquet
+*.duckdb
+*.tmp
+/tmp
+/data

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header-bar">
+    <div>
+        <h2>System Overview & Live Savings</h2>
+        <p style="color: var(--text-muted); margin: 4px 0 0 0;">Autonomous LLM routing appliance with continuous quality assurance</p>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+        <span style="font-size: 0.9rem; color: var(--text-muted);">Kill Switch:</span>
+        <button 
+            class="btn {% if global_kill %}btn-green{% else %}btn-red{% endif %}"
+            hx-post="/api/kill" 
+            hx-headers='{"Content-Type": "application/json"}'
+            hx-vals='{"enabled": {{ "false" if global_kill else "true" }}}'
+            hx-target="body"
+            hx-swap="outerHTML">
+            {% if global_kill %}🔴 RESUME TRAFFIC{% else %}🛑 EMERGENCY STOP{% endif %}
+        </button>
+    </div>
+</div>
+
+<div class="card-grid">
+    <div class="metric-card">
+        <div class="metric-title">Net Cumulative Savings</div>
+        <div class="metric-value metric-green">${{ "%.2f"|format(savings.net_savings_usd) }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Gross: ${{ "%.2f"|format(savings.gross_savings_usd) }} | Optimizer: ${{ "%.2f"|format(savings.optimizer_cost_usd) }}</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-title">Active Rerouting Policies</div>
+        <div class="metric-value metric-accent">{{ active_policies|length }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Canary Guard: 5% Sampling Active</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-title">Pending Proposals</div>
+        <div class="metric-value">{{ pending_proposals|length }}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Ready for Human / Auto Review</div>
+    </div>
+</div>
+
+<h3 style="margin-top: 36px; margin-bottom: 16px;">Active Routing Policies</h3>
+<table>
+    <thead>
+        <tr>
+            <th>Policy ID</th>
+            <th>Requested Model</th>
+            <th>Rerouted Target</th>
+            <th>Expected Non-Loss</th>
+            <th>Canary Rate</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for pol in active_policies %}
+        <tr>
+            <td><code>{{ pol.policy_id[:12] }}..</code></td>
+            <td><strong>{{ pol.requested_model }}</strong></td>
+            <td><span class="badge badge-green">{{ pol.target_model }}</span></td>
+            <td>{{ "%.1f"|format(pol.expected_nonloss * 100) }}%</td>
+            <td>{{ "%.0f"|format(pol.canary_rate * 100) }}%</td>
+            <td>
+                <button 
+                    class="btn btn-red" 
+                    style="padding: 4px 10px; font-size: 0.8rem;"
+                    hx-post="/api/policies/{{ pol.policy_id }}/disable"
+                    hx-target="body"
+                    hx-swap="outerHTML">
+                    Disable
+                </button>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 32px;">
+                No active policies. System observing traffic to detect candidate clusters.
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

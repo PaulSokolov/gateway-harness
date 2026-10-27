@@ -1,0 +1,132 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-llmproxy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-litellm}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-llmproxy} -d ${POSTGRES_DB:-litellm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    profiles: ["ha"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: ghcr.io/grow-revenue/gateway-harness:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ["migrate"]
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GH_DATABASE_URL: ${GH_DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
+
+  gateway:
+    image: ghcr.io/grow-revenue/gateway-harness:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ["gateway"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    ports:
+      - "4000:4000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ghdata:/data
+    environment:
+      GH_DATA_DIR: /data
+      GH_DATABASE_URL: ${GH_DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY}
+      GH_DEFAULT_MODE: ${GH_DEFAULT_MODE:-observe}
+      GH_GLOBAL_KILL: ${GH_GLOBAL_KILL:-false}
+      GH_WORKERS: ${GH_WORKERS:-4}
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    image: ghcr.io/grow-revenue/gateway-harness:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ["worker"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    depends_on:
+      gateway:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ghdata:/data
+    environment:
+      GH_DATA_DIR: /data
+      GH_DATABASE_URL: ${GH_DATABASE_URL}
+      GH_INTERNAL_KEY: ${LITELLM_MASTER_KEY}
+      GH_GATEWAY_URL: http://gateway:4000
+      GH_JUDGE_MODEL: ${GH_JUDGE_MODEL}
+      GH_PROPOSER_MODEL: ${GH_PROPOSER_MODEL}
+      GH_DAILY_OPTIMIZER_BUDGET_USD: ${GH_DAILY_OPTIMIZER_BUDGET_USD:-20.0}
+      GH_OBSERVATION_DAYS: ${GH_OBSERVATION_DAYS:-10}
+
+  admin:
+    image: ghcr.io/grow-revenue/gateway-harness:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ["admin"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    ports:
+      - "8100:8100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ghdata:/data:ro
+    environment:
+      GH_DATA_DIR: /data
+      GH_DATABASE_URL: ${GH_DATABASE_URL}
+      GH_ADMIN_TOKEN: ${GH_ADMIN_TOKEN}
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8100/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:
+  ghdata:
