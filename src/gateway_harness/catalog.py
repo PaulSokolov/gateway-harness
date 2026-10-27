@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import litellm
 import yaml
 
 
@@ -51,9 +50,9 @@ def load_catalog(litellm_config_path: Path | str) -> list[CatalogModel]:
             if not model_name or not underlying:
                 continue
 
-            cost_entry = litellm.model_cost.get(underlying) or litellm.model_cost.get(
-                underlying.split("/", 1)[-1], {}
-            )
+            from gateway_harness.pricing import _lookup_entry
+
+            cost_entry = _lookup_entry(underlying) or {}
 
             in_p = float(cost_entry.get("input_cost_per_token", 0.0) * 1_000_000)
             out_p = float(cost_entry.get("output_cost_per_token", 0.0) * 1_000_000)

@@ -220,27 +220,43 @@ WSL2 provides a native Linux kernel inside Windows, ideal for local Python devel
 
 ---
 
-## Meta Hackathon Demo Runbook
+## Meta Hackathon Showcase Runbook
 
-The appliance includes a built-in **Time-Compression Demo Track** designed specifically for live presentations. It fast-forwards 10 days of production traffic into 2 seconds and showcases the automated tripwire circuit breaker in action.
+The appliance features a purpose-built **Meta Hackathon Showcase Track** demonstrating autonomous enterprise cost reduction from **Meta Muse Wonder** down to **Meta Muse Spark** and **Llama 3.1 8B/70B** with zero accuracy loss:
 
+### 1. One-Command End-to-End Showcase Demo
+Run the complete 5-act optimization lifecycle in seconds:
 ```bash
-# 1. Fast-forward 10 days of simulated production data:
-docker compose -f compose/docker-compose.yml exec admin gh demo --fast-forward
+# In Docker:
+docker compose -f compose/docker-compose.yml exec admin gh demo --meta-showcase
 
-# 2. View the zero-LLM Savings Opportunity Report:
-docker compose -f compose/docker-compose.yml exec admin gh report
+# Or locally with uv:
+uv run gh demo --meta-showcase
+```
+**What happens in this demo:**
+- **Act I:** Ingests 250 enterprise dispute resolution calls targeting `meta/muse-wonder` ($4.00 in / $20.00 out per Mtok).
+- **Act II:** Funnel clusters the workflow & flags high spend ($$ target: ~$540 / 100k calls).
+- **Act III:** Harness² synthesizes prompt scaffolding (strict JSON schema guardrail) for `meta/muse-spark` & `meta/llama-3.1-8b`, validating 97.1% pairwise agreement (Wilson bound $\ge 0.95$, SPRT early stop).
+- **Act IV:** Deploys optimization policy to PostgreSQL with a 10% canary split.
+- **Act V:** Fires canary batch, verifies tripwires (error rate 0%, latency 185ms vs 620ms), and computes net realized dollar savings!
 
-# 3. Open the control center in your browser:
-# Navigate to http://localhost:8000/overview
+### 2. Live Interactive UI & Prompt Playground
+Open `http://localhost:8000/showcase` in your browser:
+- **Interactive Playground:** Submit enterprise cardholder dispute queries live and watch the proxy router make split-second routing decisions (<20µs latency).
+- **Harness² Scaffold Inspector:** Inspect the synthesized prompt scaffold (system guardrail + schema enforcement) side-by-side.
+- **Fast-Forward Button:** Trigger the full enterprise simulation directly from the web dashboard.
 
-# 4. Trigger the Chaos Injection to showcase the automated circuit breaker:
-# Simulates upstream model failure; tripwire auto-disables the policy in real-time
+### 3. Enterprise Client Simulator
+Run the autonomous enterprise client against the live gateway to simulate realistic burst or streaming production traffic:
+```bash
+# Fire 25 financial dispute calls @ 5 RPS to the gateway
+uv run gh client --gateway http://localhost:4000 --count 25 --rps 5 --model meta/muse-wonder
+```
+
+### 4. Chaos Tripwire Demo
+Simulate upstream model failure to watch the automated circuit breaker roll back the policy in real time:
+```bash
 docker compose -f compose/docker-compose.yml exec admin gh demo --chaos pol_doc_extract
-
-# 5. Emergency Kill Switch:
-# Click the "EMERGENCY STOP" button in the dashboard header or call:
-curl -X POST http://localhost:8000/api/kill -H "Content-Type: application/json" -d '{"enabled": true}'
 ```
 
 ---

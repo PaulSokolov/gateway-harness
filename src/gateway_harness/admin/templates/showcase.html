@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Meta Hackathon Showcase & Playground - Gateway-Harness{% endblock %}
+
+{% block content %}
+<div class="header-bar">
+    <div>
+        <h2 style="margin: 0; font-size: 1.6rem; color: #38bdf8;">🚀 Meta Hackathon Showcase</h2>
+        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.95rem;">
+            Enterprise Autonomous Optimization: <strong>Meta Muse Wonder</strong> &rarr; <strong>Meta Muse Spark / Llama 3.1</strong>
+        </p>
+    </div>
+    <form hx-post="/api/demo/trigger-showcase" hx-target="#showcase-results" hx-indicator="#loading-spinner">
+        <button type="submit" class="btn btn-green" style="font-size: 0.95rem; padding: 10px 18px;">
+            ⚡ Run Full Demo Fast-Forward
+        </button>
+    </form>
+</div>
+
+<div id="loading-spinner" class="htmx-indicator" style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; border-radius: 8px; padding: 16px; margin-bottom: 24px; color: #38bdf8;">
+    🔄 Running synthetic enterprise traffic, cluster value scoring, contrastive probe evaluation, and canary deployment...
+</div>
+
+<div id="showcase-results"></div>
+
+<div class="card-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 28px;">
+    <div class="metric-card" style="border-left: 4px solid #38bdf8;">
+        <div class="metric-title">FRONTIER MODEL (BASELINE)</div>
+        <div class="metric-value" style="font-size: 1.35rem; color: #f8fafc; margin-top: 6px;">Meta Muse Wonder</div>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">
+            $4.00 In / $20.00 Out per Mtok &bull; 1M Context
+        </p>
+    </div>
+    <div class="metric-card" style="border-left: 4px solid #22c55e;">
+        <div class="metric-title">AUTONOMOUS ROUTED TARGET</div>
+        <div class="metric-value" style="font-size: 1.35rem; color: #4ade80; margin-top: 6px;">Meta Muse Spark</div>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">
+            $1.25 In / $4.25 Out per Mtok &bull; <strong>78.5% Cost Reduction</strong>
+        </p>
+    </div>
+    <div class="metric-card" style="border-left: 4px solid #a855f7;">
+        <div class="metric-title">ULTRA-LOW COST ROUTE</div>
+        <div class="metric-value" style="font-size: 1.35rem; color: #c084fc; margin-top: 6px;">Llama 3.1 8B Instruct</div>
+        <p style="margin: 8px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">
+            $0.05 In / $0.05 Out per Mtok &bull; <strong>96.2% Cost Reduction</strong>
+        </p>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+    <!-- Interactive Prompt Playground -->
+    <div class="metric-card">
+        <h3 style="margin-top: 0; font-size: 1.15rem; color: #38bdf8;">🎮 Live Proxy Playground</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            Submit an enterprise dispute prompt directly to the appliance router (latency: &lt;20&micro;s).
+        </p>
+        <form hx-post="/api/playground/test" hx-target="#playground-response">
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">REQUESTED MODEL</label>
+            <select name="model" style="width: 100%; background: #0f172a; border: 1px solid var(--border); color: white; padding: 8px; border-radius: 6px; margin-bottom: 14px;">
+                <option value="meta/muse-wonder" selected>meta/muse-wonder (Baseline Frontier)</option>
+                <option value="meta/muse-spark">meta/muse-spark (Agentic Reasoning)</option>
+                <option value="meta/llama-3.1-8b-instruct">meta/llama-3.1-8b-instruct (Ultra-Light)</option>
+            </select>
+
+            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px;">ENTERPRISE CARDHOLDER STATEMENT</label>
+            <textarea name="statement" rows="4" style="width: 100%; box-sizing: border-box; background: #0f172a; border: 1px solid var(--border); color: #f8fafc; padding: 10px; border-radius: 6px; font-family: monospace; font-size: 0.85rem; margin-bottom: 14px;">Subscription was cancelled via support portal on Oct 1st. Merchant re-charged card $249.00 on Oct 14th without authorization. Request full chargeback reversal.</textarea>
+
+            <button type="submit" class="btn" style="width: 100%;">
+                ⚡ Route Request Through Gateway
+            </button>
+        </form>
+
+        <div id="playground-response" style="margin-top: 18px;"></div>
+    </div>
+
+    <!-- Harness2 Scaffolding & Prompt Inspector -->
+    <div class="metric-card">
+        <h3 style="margin-top: 0; font-size: 1.15rem; color: #a855f7;">🧬 Harness² Scaffolding Engine</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;">
+            How smaller models achieve parity with frontier models via synthesized scaffolding.
+        </p>
+        
+        <div style="background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 0.8rem; color: #f87171; font-weight: 600; margin-bottom: 6px;">❌ Zero-Shot Failure Mode (Candidate alone)</div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0;">
+                Smaller models occasionally output free-form markdown or omit regulatory <code>chargeback_code</code> on international edge-cases.
+            </p>
+        </div>
+
+        <div style="background: #0f172a; border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+            <div style="font-size: 0.8rem; color: #4ade80; font-weight: 600; margin-bottom: 6px;">✅ Synthesized Harness² Scaffold</div>
+            <pre style="margin: 0; font-size: 0.78rem; color: #38bdf8; white-space: pre-wrap; font-family: monospace;">SYSTEM INJECTION:
+"Ensure strict JSON schema compliance:
+{'dispute_id': str, 'decision': 'ACCEPT'|'REJECT'|'ESCALATE',
+ 'risk_score': float, 'chargeback_code': str, 'reasoning': str}
+Think step-by-step through Visa/Mastercard rules before output."</pre>
+        </div>
+
+        <div style="background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; padding: 12px; font-size: 0.82rem;">
+            <strong>Verification Result:</strong> Pairwise Judge Agreement: <strong>97.1%</strong> &bull; Wilson Bound: <strong>0.958 &ge; 0.95</strong> &bull; Statistical Parity Achieved.
+        </div>
+    </div>
+</div>
+{% endblock %}

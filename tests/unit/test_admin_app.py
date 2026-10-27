@@ -97,3 +97,17 @@ def test_pages_rendering(client):
                 res_clusters = client.get("/clusters")
                 assert res_clusters.status_code == 200
                 assert "Workload Clusters" in res_clusters.text
+
+                # Showcase
+                res_showcase = client.get("/showcase")
+                assert res_showcase.status_code == 200
+                assert "Meta Hackathon Showcase" in res_showcase.text
+
+                # Playground Test API
+                res_play = client.post(
+                    "/api/playground/test",
+                    data={"model": "meta/muse-wonder", "statement": "Unauthorized charge of $50."},
+                )
+                assert res_play.status_code == 200
+                assert "ROUTED & OPTIMIZED" in res_play.text
+                assert "meta/muse-spark" in res_play.text

@@ -7,6 +7,56 @@ import litellm
 logger = logging.getLogger(__name__)
 
 
+# Explicit pricing overrides for Meta Muse and Llama models ($ per million tokens)
+# Ensures accurate pricing even if the pinned litellm version lacks recent 2026 models.
+CUSTOM_PRICING: dict[str, dict[str, float]] = {
+    "meta/muse-wonder": {
+        "input_cost_per_token": 4.00 / 1_000_000,
+        "output_cost_per_token": 20.00 / 1_000_000,
+        "cache_read_input_token_cost": 0.20 / 1_000_000,
+    },
+    "meta/muse-spark": {
+        "input_cost_per_token": 1.25 / 1_000_000,
+        "output_cost_per_token": 4.25 / 1_000_000,
+        "cache_read_input_token_cost": 0.15 / 1_000_000,
+    },
+    "meta/muse-spark-open": {
+        "input_cost_per_token": 1.25 / 1_000_000,
+        "output_cost_per_token": 4.25 / 1_000_000,
+        "cache_read_input_token_cost": 0.15 / 1_000_000,
+    },
+    "meta/llama-3.3-70b-instruct": {
+        "input_cost_per_token": 0.40 / 1_000_000,
+        "output_cost_per_token": 0.40 / 1_000_000,
+        "cache_read_input_token_cost": 0.10 / 1_000_000,
+    },
+    "meta/llama-3.1-70b-instruct": {
+        "input_cost_per_token": 0.40 / 1_000_000,
+        "output_cost_per_token": 0.40 / 1_000_000,
+        "cache_read_input_token_cost": 0.10 / 1_000_000,
+    },
+    "meta/llama-3.1-8b-instruct": {
+        "input_cost_per_token": 0.05 / 1_000_000,
+        "output_cost_per_token": 0.05 / 1_000_000,
+        "cache_read_input_token_cost": 0.01 / 1_000_000,
+    },
+}
+
+
+def _lookup_entry(model: str) -> dict[str, float] | None:
+    norm = model.lower()
+    if norm in CUSTOM_PRICING:
+        return CUSTOM_PRICING[norm]
+    # Check stripped provider prefixes (e.g., openrouter/meta/muse-spark -> meta/muse-spark)
+    for k, v in CUSTOM_PRICING.items():
+        if norm.endswith(k) or k.endswith(norm):
+            return v
+    entry = litellm.model_cost.get(model)
+    if not entry and "/" in model:
+        entry = litellm.model_cost.get(model.split("/", 1)[-1])
+    return entry
+
+
 def cost(
     model: str,
     prompt_tokens: int,
@@ -18,10 +68,7 @@ def cost(
     Returns None if model pricing is not found. Never raises.
     """
     try:
-        entry = litellm.model_cost.get(model)
-        if not entry and "/" in model:
-            # Fallback check without provider prefix
-            entry = litellm.model_cost.get(model.split("/", 1)[-1])
+        entry = _lookup_entry(model)
 
         if not entry:
             # Try litellm.cost_per_token directly
@@ -48,10 +95,7 @@ def cost(
 def price_per_mtok(model: str) -> tuple[float, float] | None:
     """Return (input_price_per_mtok, output_price_per_mtok) in USD, or None."""
     try:
-        entry = litellm.model_cost.get(model)
-        if not entry and "/" in model:
-            entry = litellm.model_cost.get(model.split("/", 1)[-1])
-
+        entry = _lookup_entry(model)
         if not entry:
             return None
 

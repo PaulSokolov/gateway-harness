@@ -10,6 +10,31 @@ model_list:
       api_key: fake-key
       mock_response: "Hello from spike-dst"
 
+  # Meta Hackathon Stack
+  - model_name: meta/muse-wonder
+    litellm_params:
+      model: openrouter/meta/muse-wonder
+      api_key: os.environ/OPENROUTER_API_KEY
+      mock_response: '{"status": "escalated", "confidence": 0.98, "risk_level": "medium", "reasoning": "High-value cross-border dispute requiring compliance audit."}'
+
+  - model_name: meta/muse-spark
+    litellm_params:
+      model: openrouter/meta/muse-spark
+      api_key: os.environ/OPENROUTER_API_KEY
+      mock_response: '{"status": "escalated", "confidence": 0.98, "risk_level": "medium", "reasoning": "High-value cross-border dispute requiring compliance audit."}'
+
+  - model_name: meta/llama-3.1-8b-instruct
+    litellm_params:
+      model: openrouter/meta/llama-3.1-8b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+      mock_response: '{"status": "escalated", "confidence": 0.98, "risk_level": "medium", "reasoning": "High-value cross-border dispute requiring compliance audit."}'
+
+  - model_name: meta/llama-3.3-70b-instruct
+    litellm_params:
+      model: openrouter/meta/llama-3.3-70b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+      mock_response: '{"status": "escalated", "confidence": 0.98, "risk_level": "medium", "reasoning": "High-value cross-border dispute requiring compliance audit."}'
+
 litellm_settings:
   callbacks:
     - custom_callbacks.spike_handler

@@ -31,8 +31,21 @@ def main() -> None:
         "--fast-forward", action="store_true", help="Fast-forward 10 days of simulated production traces"
     )
     demo_parser.add_argument(
+        "--meta-showcase",
+        action="store_true",
+        help="Run end-to-end Meta Hackathon Muse Wonder -> Spark/Llama showcase",
+    )
+    demo_parser.add_argument(
         "--chaos", type=str, metavar="POLICY_ID", help="Inject chaos regression to trigger tripwire"
     )
+
+    # client command
+    client_parser = subparsers.add_parser("client", help="Run enterprise client traffic generator")
+    client_parser.add_argument("--count", type=int, default=15, help="Number of requests")
+    client_parser.add_argument("--rps", type=float, default=2.0, help="Target requests per second")
+    client_parser.add_argument("--model", default="meta/muse-wonder", help="Target enterprise model")
+    client_parser.add_argument("--gateway", default="http://localhost:4000", help="Gateway base URL")
+    client_parser.add_argument("--key", default="sk-test-master-key", help="Gateway master/client API key")
 
     args = parser.parse_args()
     settings = get_settings()
@@ -45,7 +58,7 @@ def main() -> None:
             if local_fallback.exists():
                 cfg_path = local_fallback
 
-        ledger_dir = settings.DATA_DIR / "ledger"
+        ledger_dir = settings.resolved_data_dir / "ledger"
         store = LedgerStore(ledger_dir, read_only=True)
         report_data = generate_report(store, cfg_path, settings, window_days=args.window)
         store.close()
@@ -59,7 +72,7 @@ def main() -> None:
         from gateway_harness.demo.chaos import inject_quality_degradation
         from gateway_harness.demo.fast_forward import seed_demo_traffic
 
-        ledger_dir = settings.DATA_DIR / "ledger"
+        ledger_dir = settings.resolved_data_dir / "ledger"
         store = LedgerStore(ledger_dir, read_only=False)
 
         if args.fast_forward:
@@ -67,12 +80,43 @@ def main() -> None:
             print(f"✨ Fast-forward complete! Seeded {count} requests across 10 simulated days.")
             print("Run 'gh report' or visit http://localhost:8000 to see identified clusters and savings!")
 
+        if args.meta_showcase:
+            import asyncio
+
+            from gateway_harness.demo.meta_showcase import run_meta_hackathon_showcase
+
+            asyncio.run(
+                run_meta_hackathon_showcase(
+                    data_dir=settings.resolved_data_dir,
+                    db_url=settings.DATABASE_URL,
+                )
+            )
+
         if args.chaos:
             import asyncio
 
             disabled = asyncio.run(inject_quality_degradation(store, policy_id=args.chaos))
             print(f"🚨 Chaos injected! Circuit breaker evaluated and disabled: {disabled}")
         store.close()
+
+    elif args.command == "client":
+        import asyncio
+
+        from gateway_harness.demo.enterprise_client import run_enterprise_traffic
+
+        print(f"🚀 Firing enterprise workload ({args.count} requests) to {args.gateway}...")
+        results = asyncio.run(
+            run_enterprise_traffic(
+                gateway_url=args.gateway,
+                api_key=args.key,
+                count=args.count,
+                rps=args.rps,
+                model=args.model,
+            )
+        )
+        succeeded = sum(1 for r in results if r.get("status_code") == 200)
+        routed = sum(1 for r in results if r.get("scaffold_applied"))
+        print(f"\nDone: {succeeded}/{len(results)} successful calls. Scaffolded/routed: {routed}.")
     else:
         parser.print_help()
         sys.exit(1)

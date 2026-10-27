@@ -15,6 +15,18 @@ class Settings(BaseSettings):
     )
 
     DATA_DIR: Path = Path("/data")
+
+    @property
+    def resolved_data_dir(self) -> Path:
+        """Return DATA_DIR, falling back to local ./data if /data is not writable (e.g. non-root/macOS)."""
+        p = self.DATA_DIR
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+            return p
+        except (PermissionError, OSError):
+            fallback = Path.cwd() / "data"
+            fallback.mkdir(parents=True, exist_ok=True)
+            return fallback
     DATABASE_URL: str | None = None
     DEFAULT_MODE: Literal["off", "observe", "shadow", "suggest", "auto"] = "observe"
     GLOBAL_KILL: bool = False
