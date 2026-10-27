@@ -31,6 +31,7 @@ WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
 COPY config/ /app/config/
+COPY migrations/ /app/migrations/
 COPY docker/entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 

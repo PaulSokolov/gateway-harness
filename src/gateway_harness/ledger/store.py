@@ -20,12 +20,19 @@ class LedgerStore:
 
     def apply_migrations(self) -> None:
         """Apply all SQL migration scripts in order."""
-        migrations_dir = Path(__file__).parent.parent.parent.parent / "migrations" / "duckdb"
-        if not migrations_dir.exists():
-            # Try relative to package root
-            migrations_dir = Path(__file__).resolve().parents[3] / "migrations" / "duckdb"
+        candidates = [
+            Path("/app/migrations/duckdb"),
+            Path(__file__).parent.parent.parent.parent / "migrations" / "duckdb",
+            Path(__file__).resolve().parents[3] / "migrations" / "duckdb",
+            Path.cwd() / "migrations" / "duckdb",
+        ]
+        migrations_dir = None
+        for c in candidates:
+            if c.exists():
+                migrations_dir = c
+                break
 
-        if migrations_dir.exists():
+        if migrations_dir and migrations_dir.exists():
             for sql_file in sorted(migrations_dir.glob("*.sql")):
                 sql = sql_file.read_text(encoding="utf-8")
                 self.con.execute(sql)

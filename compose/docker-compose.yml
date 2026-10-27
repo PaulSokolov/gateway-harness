@@ -66,7 +66,7 @@ services:
       GH_GLOBAL_KILL: ${GH_GLOBAL_KILL:-false}
       GH_WORKERS: ${GH_WORKERS:-4}
     healthcheck:
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')\""]
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/liveliness')\""]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -120,7 +120,7 @@ services:
       GH_DATABASE_URL: ${GH_DATABASE_URL}
       GH_ADMIN_TOKEN: ${GH_ADMIN_TOKEN}
     healthcheck:
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8100/health')\""]
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health')\""]
       interval: 10s
       timeout: 5s
       retries: 3

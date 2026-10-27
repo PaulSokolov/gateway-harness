@@ -53,8 +53,17 @@ async def migrate(dsn: str | None = None, migrations_dir: Path | None = None) ->
         raise ValueError("DATABASE_URL must be configured")
 
     if migrations_dir is None:
-        # Default to appliance/migrations/postgres
-        migrations_dir = Path(__file__).resolve().parent.parent.parent.parent / "migrations" / "postgres"
+        candidates = [
+            Path("/app/migrations/postgres"),
+            Path(__file__).resolve().parent.parent.parent.parent / "migrations" / "postgres",
+            Path.cwd() / "migrations" / "postgres",
+        ]
+        for c in candidates:
+            if c.is_dir():
+                migrations_dir = c
+                break
+        else:
+            migrations_dir = candidates[0]
 
     if not migrations_dir.is_dir():
         return 0
